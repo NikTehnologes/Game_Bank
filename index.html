@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Банк Каток 🎮</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .bank-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .currency-name {
+            color: #666;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .balance-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .balance-label {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .balance-amount {
+            font-size: 3.5em;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-spend {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #636e72, #2d3436);
+            color: white;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, #0984e3, #074b83);
+            color: white;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .btn-icon {
+            font-size: 1.2em;
+        }
+
+        .transaction-history {
+            margin: 30px 0;
+        }
+
+        .transaction-history h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .history-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item.spend {
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .history-item.add {
+            border-left: 4px solid #00b894;
+        }
+
+        .history-amount {
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .history-date {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .info-section {
+            margin-top: 30px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-card h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .info-card p {
+            color: #666;
+            margin: 5px 0;
+            line-height: 1.4;
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 25px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            margin-top: 20px;
+        }
+
+        #addAmount {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        #addAmount:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Анимации */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease;
+        }
+
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            max-width: 300px;
+        }
+
+        .notification-success {
+            background: #00b894;
+        }
+
+        .notification-error {
+            background: #ff6b6b;
+        }
+
+        .notification-info {
+            background: #0984e3;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .bank-card {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .balance-amount {
+                font-size: 2.8em;
+            }
+            
+            .btn {
+                padding: 12px 15px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="bank-card">
+            <div class="header">
+                <h1>🎮 Банк Каток</h1>
+                <div class="currency-name">Валюта: КАТКИ</div>
+            </div>
+            
+            <div class="balance-section">
+                <div class="balance-label">Текущий баланс:</div>
+                <div class="balance-amount" id="balance">0</div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-spend" onclick="spendCurrency()">
+                    <span class="btn-icon">➖</span>
+                    Потратить 1 катку
+                </button>
+                
+                <button class="btn btn-add" onclick="addCurrency()">
+                    <span class="btn-icon">➕</span>
+                    Добавить катки
+                </button>
+
+                <button class="btn btn-reset" onclick="resetBalance()">
+                    <span class="btn-icon">🔄</span>
+                    Сбросить баланс
+                </button>
+            </div>
+
+            <div class="transaction-history">
+                <h3>История операций</h3>
+                <div class="history-list" id="history"></div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-card">
+                    <h4>💡 Как использовать?</h4>
+                    <p>1. Сыграй с сестрой в игру</p>
+                    <p>2. Нажми "Добавить катки"</p>
+                    <p>3. Когда попросишь её о чём-то - нажми "Потратить 1 катку"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для добавления каток -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Добавить катки</h2>
+            <div class="modal-body">
+                <input type="number" id="addAmount" placeholder="Сколько каток добавить?" min="1" value="1">
+                <button class="btn btn-confirm" onclick="confirmAdd()">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Ключи для localStorage
+        const STORAGE_KEYS = {
+            BALANCE: 'bank_balance',
+            HISTORY: 'transaction_history'
+        };
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBalance();
+            loadHistory();
+        });
+
+        // Загрузка баланса
+        function loadBalance() {
+            const balance = localStorage.getItem(STORAGE_KEYS.BALANCE) || '0';
+            document.getElementById('balance').textContent = balance;
+        }
+
+        // Загрузка истории
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEYS.HISTORY) || '[]');
+            const historyElement = document.getElementById('history');
+            
+            historyElement.innerHTML = '';
+            
+            if (history.length === 0) {
+                historyElement.innerHTML = '<div class="history-item">История операций пуста</div>';
+                return;
+            }
+            
+            // Показываем последние 10 операций
+            history.slice(-10).reverse().forEach(transaction => {
+                const item = document.createElement('div');
+                item.className = `history-item ${transaction.type}`;
+                
+                const sign = transaction.type === 'add' ? '+' : '-';
+                const color = transaction.type === 'add' ? '#00b894' : '#ff6b6b';
+                
+                item.innerHTML = `
+                    <span class="history-amount" style="color: ${color}">${sign}${transaction.amount}</span>
+                    <span class="history-description">${transaction.description}</span>
+                    <span class="history-date">${formatDate(transaction.date)}</span>
+                `;
+                
+                historyElement.appendChild(item);
+            });
+        }
+
+        // Потратить валюту
+        function spendCurrency() {
+            const currentBalance = parseInt(localStorage.getItem(STORAGE_KEYS.BALANCE) || '0');
+            
+            if (currentBalance <= 0) {
+                showNotification('Недостаточно каток!', 'error');
+                return;
+            }
+            
+            const newBalance = currentBalance - 1;
+            localStorage.setItem(STORAGE_KEYS.BALANCE, newBalance.toString());
+            
+            // Добавляем в историю
+            addToHistory({
+                type: 'spend',
+                amount: 1,
+                description: 'Потрачена 1 катка',
+                date: new Date().toISOString()
+            });
+            
+            updateBalanceDisplay();
+            showNotification('Катка успешно потрачена!', 'success');
+        }
+
+        // Добавить валюту
+        function addCurrency() {
+            document.getElementById('addModal').style.display = 'block';
+            document.getElementById('addAmount').focus();
+        }
+
+        // Подтверждение добавления
+        function confirmAdd() {
+            const amount = parseInt(document.getElementById('addAmount').value);
+            
+            if (isNaN(amount) || amount <= 0) {
+                showNotification('Введите корректное число!', 'error');
+                return;
+            }
+            
+            const currentBalance = parseInt(localStorage.getItem(STORAGE_KEYS.BALANCE) || '0');
+            const newBalance = currentBalance + amount;
+            
+            localStorage.setItem(STORAGE_KEYS.BALANCE, newBalance.toString());
+            
+            // Добавляем в историю
+            addToHistory({
+                type: 'add',
+                amount: amount,
+                description: `Добавлено ${amount} каток`,
+                date: new Date().toISOString()
+            });
+            
+            closeModal();
+            updateBalanceDisplay();
+            showNotification(`Добавлено ${amount} каток!`, 'success');
+        }
+
+        // Сброс баланса
+        function resetBalance() {
+            if (confirm('Вы уверены, что хотите сбросить весь баланс и историю?')) {
+                localStorage.removeItem(STORAGE_KEYS.BALANCE);
+                localStorage.removeItem(STORAGE_KEYS.HISTORY);
+                updateBalanceDisplay();
+                loadHistory();
+                showNotification('Баланс сброшен!', 'info');
+            }
+        }
+
+        // Закрыть модальное окно
+        function closeModal() {
+            document.getElementById('addModal').style.display = 'none';
+            document.getElementById('addAmount').value = '1';
+        }
+
+        // Обновление отображения баланса
+        function updateBalanceDisplay() {
+            const balanceElement = document.getElementById('balance');
+            const currentBalance = localStorage.getItem(STORAGE_KEYS.BALANCE) || '0';
+            
+            balanceElement.textContent = currentBalance;
+            balanceElement.classList.add('pulse');
+            
+            setTimeout(() => {
+                balanceElement.classList.remove('pulse');
+            }, 500);
+        }
+
+        // Добавление в историю
+        function addToHistory(transaction) {
+            let history = JSON.parse(localStorage.getItem(STORAGE_KEYS.HISTORY) || '[]');
+            history.push(transaction);
+            localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
+            loadHistory();
+        }
+
+        // Форматирование даты
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU') + ' ' + date.toLocaleTimeString('ru-RU', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Показать уведомление
+        function showNotification(message, type = 'info') {
+            // Создаем элемент уведомления
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Удаляем через 3 секунды
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Закрытие модального окна при клике вне его
+        window.onclick = function(event) {
+            const modal = document.getElementById('addModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Обработка Enter в модальном окне
+        document.getElementById('addAmount').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                confirmAdd();
+            }
+        });
+    </script>
+</body>
+</html>
